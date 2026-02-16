@@ -12,7 +12,7 @@ object Api {
         level = HttpLoggingInterceptor.Level.BODY
     }
     // TODO: вставь сюда реальный токен
-    private const val STATIC_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEzNjEwNzkyOTksInJvbGUiOiJhZG1pbl9zaG9wIiwiaWF0IjoxNzcxMDUzNTY1LCJleHAiOjE3NzExMzk5NjV9.-82CAmQ-lWyjNtyCFO3GQ_9WvU7glnt3APHiVi6dUTk"
+    private const val STATIC_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEzNjEwNzkyOTksInJvbGUiOiJhZG1pbl9zaG9wIiwiaWF0IjoxNzcxMjEwMjg3LCJleHAiOjE3NzEyOTY2ODd9.YYESlsICCwttYfD602ofHaQ6ZPCbY_hVbpT9_mkeOCY"
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()

@@ -9,6 +9,7 @@ class AuthInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val req = chain.request()
         val token = tokenProvider()
+        android.util.Log.d("AUTH", "AuthInterceptor token is null? ${token.isNullOrBlank()}")
 
         val newReq = if (!token.isNullOrBlank()) {
             req.newBuilder()

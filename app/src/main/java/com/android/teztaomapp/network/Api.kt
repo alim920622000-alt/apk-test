@@ -1,21 +1,24 @@
 package com.android.teztaomapp.network
 
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+
 object Api {
     private const val BASE_URL = "http://141.227.138.64:8000/"
 
-    // Временно: хранилище в памяти. Потом заменим на DataStore.
+    // ЕДИНОЕ хранилище токенов для всего приложения
     private val tokenStorage: TokenStorage = InMemoryTokenStorage()
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    // Отдельный retrofit для refresh (без authenticator!)
+    // Retrofit для refresh (без authenticator)
     private val authApi: AuthApi by lazy {
         val refreshClient = OkHttpClient.Builder()
             .addInterceptor(logging)
@@ -32,7 +35,7 @@ object Api {
     private val okHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .addInterceptor(logging)
-            .addInterceptor(AuthInterceptor { tokenStorage.accessToken() })
+            .addInterceptor(AuthInterceptor(tokenStorage)) // ✅ ВОТ ТАК
             .authenticator(TokenAuthenticator(tokenStorage, authApi))
             .build()
     }
@@ -49,6 +52,6 @@ object Api {
         retrofit.create(ApiService::class.java)
     }
 
-    // на время — чтобы из Login сохранить токены
+    // чтобы Login мог сохранить токены в ТО ЖЕ хранилище
     fun tokenStorage(): TokenStorage = tokenStorage
 }

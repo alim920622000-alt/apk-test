@@ -1,15 +1,19 @@
 package com.android.teztaomapp.network
 
+import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.Response
 
 class AuthInterceptor(
-    private val tokenProvider: () -> String?
+
+    private val tokenStorage: TokenStorage
 ) : Interceptor {
+
     override fun intercept(chain: Interceptor.Chain): Response {
         val req = chain.request()
-        val token = tokenProvider()
-        android.util.Log.d("AUTH", "AuthInterceptor token is null? ${token.isNullOrBlank()}")
+        val token = tokenStorage.accessToken()
+
+        Log.d("AUTH", "url=${req.url} hasToken=${!token.isNullOrBlank()}")
 
         val newReq = if (!token.isNullOrBlank()) {
             req.newBuilder()

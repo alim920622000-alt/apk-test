@@ -1,29 +1,46 @@
 package com.android.teztaomapp.network
 
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import okhttp3.logging.HttpLoggingInterceptor
-object Api {
 
+object Api {
     private const val BASE_URL = "http://141.227.138.64:8000/"
+
+    // Временно: хранилище в памяти. Потом заменим на DataStore.
+    private val tokenStorage: TokenStorage = InMemoryTokenStorage()
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
-    // TODO: вставь сюда реальный токен
-    private const val STATIC_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEzNjEwNzkyOTksInJvbGUiOiJhZG1pbl9zaG9wIiwiaWF0IjoxNzcxMDUzNTY1LCJleHAiOjE3NzExMzk5NjV9.-82CAmQ-lWyjNtyCFO3GQ_9WvU7glnt3APHiVi6dUTk"
 
-    private val client: OkHttpClient by lazy {
+    // Отдельный retrofit для refresh (без authenticator!)
+    private val authApi: AuthApi by lazy {
+        val refreshClient = OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build()
+
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(refreshClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(AuthApi::class.java)
+    }
+
+    private val okHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor { STATIC_TOKEN })
+            .addInterceptor(logging)
+            .addInterceptor(AuthInterceptor { tokenStorage.accessToken() })
+            .authenticator(TokenAuthenticator(tokenStorage, authApi))
             .build()
     }
 
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(client)
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -31,4 +48,7 @@ object Api {
     val service: ApiService by lazy {
         retrofit.create(ApiService::class.java)
     }
+
+    // на время — чтобы из Login сохранить токены
+    fun tokenStorage(): TokenStorage = tokenStorage
 }

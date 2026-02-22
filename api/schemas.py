@@ -13,9 +13,29 @@ class TelegramAuthRequest(BaseModel):
     telegram_user_id: int = Field(gt=0)
 
 
-class TokenResponse(BaseModel):
+class LoginResponse(BaseModel):
     access_token: str
+    refresh_token: str
+    expires_in: int
     token_type: str = "bearer"
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str = Field(min_length=16)
+
+
+class RefreshTokenResponse(BaseModel):
+    access_token: str
+    expires_in: int
+    token_type: str = "bearer"
+
+
+class LogoutRequest(BaseModel):
+    refresh_token: str = Field(min_length=16)
+
+
+class LogoutResponse(BaseModel):
+    detail: str
 
 
 class CursorPage(BaseModel):

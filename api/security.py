@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import json
 import os
+import secrets
 import time
 from typing import Any
 
@@ -13,6 +14,7 @@ from fastapi import HTTPException, status
 
 JWT_ALG = "HS256"
 JWT_EXPIRE_SECONDS = int(os.getenv("API_JWT_EXPIRE_SECONDS", "86400"))
+REFRESH_EXPIRE_SECONDS = int(os.getenv("API_REFRESH_EXPIRE_SECONDS", "2592000"))
 
 
 def _b64url_encode(raw: bytes) -> str:
@@ -45,6 +47,18 @@ def create_access_token(payload: dict[str, Any]) -> str:
     signing_input = f"{header}.{body_part}".encode("utf-8")
     signature = hmac.new(_get_secret().encode("utf-8"), signing_input, hashlib.sha256).digest()
     return f"{header}.{body_part}.{_b64url_encode(signature)}"
+
+
+def generate_refresh_token() -> str:
+    return secrets.token_urlsafe(48)
+
+
+def get_access_expires_in() -> int:
+    return JWT_EXPIRE_SECONDS
+
+
+def get_refresh_expires_at() -> int:
+    return int(time.time()) + REFRESH_EXPIRE_SECONDS
 
 
 def decode_access_token(token: str) -> dict[str, Any]:
